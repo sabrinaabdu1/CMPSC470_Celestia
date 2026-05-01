@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Celestia Compiler
 A beginner-friendly toy language compiler written in Python.
