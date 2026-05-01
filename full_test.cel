@@ -1,0 +1,26 @@
+// Variables
+num x = 10
+num y = 5
+String name = "Celestia"
+Boolean passed = true
+
+// Arithmetic
+num total = x + y * 2
+print total
+
+// String
+print name
+
+// Boolean / if else
+if total >= 20 {
+    print "Total is high"
+} else {
+    print "Total is low"
+}
+
+// While loop
+num count = 0
+while count < 3 {
+    print count
+    count = count + 1
+}

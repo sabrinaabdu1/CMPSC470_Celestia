@@ -1,0 +1,22 @@
+// Example Celestia program
+
+num score = 80
+score = score + 15
+
+String name = "lisa"
+Boolean passed = score >= 90
+
+print name
+print score
+
+if passed {
+    print "Great job"
+} else {
+    print "Keep practicing"
+}
+
+num count = 0
+while count < 3 {
+    print count
+    count = count + 1
+}
