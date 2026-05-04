@@ -4,7 +4,7 @@ num score = 80
 score = score + 15
 
 String name = "lisa"
-Boolean passed = score >= 90
+Boolean passed = true
 
 print name
 print score

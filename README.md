@@ -121,7 +121,20 @@ Verifies:
 - type checking
 - invalid program rejection
 ---
- 
+---
+
+### 4. Symbol Table Demo
+
+Run:
+
+```bash
+python3 symbol_table.py
+```
+
+Demonstrates the `SymbolTable` class used by the semantic analyzer to track variable names and types during compilation. Can be run independently without a `.cel` file.
+
+---
+
 ## Additional Commands
  
 Show generated Python code:

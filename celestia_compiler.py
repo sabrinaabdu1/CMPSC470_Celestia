@@ -398,6 +398,47 @@ class Parser:
 
 
 # ============================================================
+# Symbol Table
+# ============================================================
+
+class SymbolTable:
+    """
+    Stores variable names and their declared types for the semantic analysis stage.
+
+    Each entry maps an identifier (str) to its Celestia type: 'num', 'String', or 'Boolean'.
+    The table is built incrementally as VarDecl nodes are visited and is consulted
+    for every Assignment and Variable reference to enforce type safety.
+    """
+
+    def __init__(self):
+        self._table: dict[str, str] = {}
+
+    def declare(self, name: str, var_type: str) -> None:
+        """Register a new variable. Raises KeyError if already declared."""
+        if name in self._table:
+            raise KeyError(f"Variable '{name}' is already declared")
+        self._table[name] = var_type
+
+    def lookup(self, name: str) -> str:
+        """Return the type of a declared variable. Raises KeyError if undeclared."""
+        if name not in self._table:
+            raise KeyError(f"Variable '{name}' is undeclared")
+        return self._table[name]
+
+    def contains(self, name: str) -> bool:
+        """Return True if the variable has been declared."""
+        return name in self._table
+
+    def all_entries(self) -> dict[str, str]:
+        """Return a copy of the full symbol table (name -> type)."""
+        return dict(self._table)
+
+    def __repr__(self) -> str:
+        rows = "\n".join(f"  {name:<20} {vtype}" for name, vtype in self._table.items())
+        return f"SymbolTable({{\n{rows}\n}})" if rows else "SymbolTable({})"
+
+
+# ============================================================
 # Semantic Analyzer
 # ============================================================
 
@@ -407,7 +448,7 @@ class SemanticError(Exception):
 
 class SemanticAnalyzer:
     def __init__(self):
-        self.symbols: dict[str, str] = {}
+        self.symbols = SymbolTable()
 
     def analyze(self, program: Program) -> None:
         for stmt in program.statements:
@@ -418,7 +459,7 @@ class SemanticAnalyzer:
             if stmt.name in KEYWORDS:
                 raise SemanticError(f"'{stmt.name}' is a reserved keyword and cannot be used as a variable name")
 
-            if stmt.name in self.symbols:
+            if self.symbols.contains(stmt.name):
                 raise SemanticError(f"Variable '{stmt.name}' is already declared")
 
             expr_type = self.check_expr(stmt.expr)
@@ -428,14 +469,14 @@ class SemanticAnalyzer:
                     f"TypeError: cannot assign {expr_type} value to {stmt.var_type} variable '{stmt.name}'"
                 )
 
-            self.symbols[stmt.name] = stmt.var_type
+            self.symbols.declare(stmt.name, stmt.var_type)
             return
 
         if isinstance(stmt, Assignment):
-            if stmt.name not in self.symbols:
+            if not self.symbols.contains(stmt.name):
                 raise SemanticError(f"Variable '{stmt.name}' is undeclared")
 
-            expected = self.symbols[stmt.name]
+            expected = self.symbols.lookup(stmt.name)
             actual = self.check_expr(stmt.expr)
 
             if expected != actual:
@@ -477,9 +518,9 @@ class SemanticAnalyzer:
             return expr.literal_type
 
         if isinstance(expr, Variable):
-            if expr.name not in self.symbols:
+            if not self.symbols.contains(expr.name):
                 raise SemanticError(f"Variable '{expr.name}' is undeclared")
-            return self.symbols[expr.name]
+            return self.symbols.lookup(expr.name)
 
         if isinstance(expr, BinaryOp):
             left_type = self.check_expr(expr.left)
